@@ -13,18 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package cmd
+package main
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"unicode"
 
-	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
+
+	neat "github.com/addreas/kubectl-neat/pkg"
 )
 
 var outputFormat *string
@@ -71,7 +70,7 @@ kubectl neat -f ./my-pod.json --output yaml`,
 		if !cmd.Flag("output").Changed {
 			outFormat = "same"
 		}
-		out, err = NeatYAMLOrJSON(in, outFormat)
+		out, err = neat.NeatYAMLOrJSON(in, outFormat)
 		if err != nil {
 			return err
 		}
@@ -119,7 +118,7 @@ kubectl neat get -- svc -n default myservice --output json`,
 		if !cmd.Flag("output").Changed && kubeout == "json" {
 			outFormat = "json"
 		}
-		out, err = NeatYAMLOrJSON(kres, outFormat)
+		out, err = neat.NeatYAMLOrJSON(kres, outFormat)
 		if err != nil {
 			return err
 		}
@@ -140,38 +139,4 @@ var versionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("kubectl-neat version: %s\n", Version)
 	},
-}
-
-func isJSON(s []byte) bool {
-	return bytes.HasPrefix(bytes.TrimLeftFunc(s, unicode.IsSpace), []byte{'{'})
-}
-
-// NeatYAMLOrJSON converts 'in' to json if needed, invokes neat, and converts back if needed according the the outputFormat argument: yaml/json/same
-func NeatYAMLOrJSON(in []byte, outputFormat string) (out []byte, err error) {
-	var injson, outjson string
-	itsYaml := !isJSON(in)
-	if itsYaml {
-		injsonbytes, err := yaml.YAMLToJSON(in)
-		if err != nil {
-			return nil, fmt.Errorf("error converting from yaml to json : %v", err)
-		}
-		injson = string(injsonbytes)
-	} else {
-		injson = string(in)
-	}
-
-	outjson, err = Neat(injson)
-	if err != nil {
-		return nil, fmt.Errorf("error neating : %v", err)
-	}
-
-	if outputFormat == "yaml" || (outputFormat == "same" && itsYaml) {
-		out, err = yaml.JSONToYAML([]byte(outjson))
-		if err != nil {
-			return nil, fmt.Errorf("error converting from json to yaml : %v", err)
-		}
-	} else {
-		out = []byte(outjson)
-	}
-	return
 }

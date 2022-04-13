@@ -15,10 +15,6 @@ limitations under the License.
 */
 package main
 
-import (
-	"github.com/itaysk/kubectl-neat/cmd"
-)
-
 func main() {
-	cmd.Execute()
+	Execute()
 }

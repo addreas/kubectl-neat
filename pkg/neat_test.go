@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package cmd
+package neat
 
 import (
 	"io/ioutil"
@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/itaysk/kubectl-neat/pkg/testutil"
+	"github.com/addreas/kubectl-neat/pkg/testutil"
 )
 
 func TestNeatMetadata(t *testing.T) {
@@ -192,7 +192,7 @@ func TestNeatServiceAccount(t *testing.T) {
 									"mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
 									"name": "default-token-nmshj",
 									"readOnly": true
-								}						
+								}
 							]
 						}
 					],
@@ -236,7 +236,7 @@ func TestNeatServiceAccount(t *testing.T) {
 									"mountPath": "/my",
 									"name": "my",
 									"readOnly": false
-								}						
+								}
 							]
 						}
 					],

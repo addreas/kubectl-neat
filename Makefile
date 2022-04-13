@@ -27,7 +27,7 @@ build: dist/kubectl-neat_$(os)_$(arch)
 
 SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 dist/kubectl-neat_%: $(SRC)
-	GOOS=$(call underscore,$*,1) GOARCH=$(call underscore,$*,2) go build -o dist/$(@F)
+	GOOS=$(call underscore,$*,1) GOARCH=$(call underscore,$*,2) go build ./cmd/kubectl-neat -o dist/$(@F)
 
 # release by default will not publish. run with `publish=1` to publish
 goreleaserflags = --skip-publish --snapshot
@@ -36,7 +36,7 @@ ifdef publish
 endif
 # relase always re-builds (no dependencies on purpose)
 goreleaser: $(SRC)
-	goreleaser --rm-dist $(goreleaserflags) 
+	goreleaser --rm-dist $(goreleaserflags)
 
 dist/kubectl-neat_darwin_arm64.tar.gz dist/kubectl-neat_darwin_amd64.tar.gz dist/kubectl-neat_linux_arm64.tar.gz dist/kubectl-neat_linux_amd64.tar.gz dist/checksums.txt: goreleaser
 	# no op recipe

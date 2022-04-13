@@ -13,13 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package cmd
+package neat
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
+	"unicode"
 
-	"github.com/itaysk/kubectl-neat/pkg/defaults"
+	"github.com/addreas/kubectl-neat/pkg/defaults"
+	"sigs.k8s.io/yaml"
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -208,4 +211,38 @@ func isResultEmpty(j gjson.Result) bool {
 		return len(vt) == 0
 	}
 	return false
+}
+
+func isJSON(s []byte) bool {
+	return bytes.HasPrefix(bytes.TrimLeftFunc(s, unicode.IsSpace), []byte{'{'})
+}
+
+// NeatYAMLOrJSON converts 'in' to json if needed, invokes neat, and converts back if needed according the the outputFormat argument: yaml/json/same
+func NeatYAMLOrJSON(in []byte, outputFormat string) (out []byte, err error) {
+	var injson, outjson string
+	itsYaml := !isJSON(in)
+	if itsYaml {
+		injsonbytes, err := yaml.YAMLToJSON(in)
+		if err != nil {
+			return nil, fmt.Errorf("error converting from yaml to json : %v", err)
+		}
+		injson = string(injsonbytes)
+	} else {
+		injson = string(in)
+	}
+
+	outjson, err = Neat(injson)
+	if err != nil {
+		return nil, fmt.Errorf("error neating : %v", err)
+	}
+
+	if outputFormat == "yaml" || (outputFormat == "same" && itsYaml) {
+		out, err = yaml.JSONToYAML([]byte(outjson))
+		if err != nil {
+			return nil, fmt.Errorf("error converting from json to yaml : %v", err)
+		}
+	} else {
+		out = []byte(outjson)
+	}
+	return
 }
