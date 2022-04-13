@@ -54,7 +54,7 @@ var cmd = cobra.Command{
 			return err
 		}
 
-		c := exec.Command("diff", "-uN", "--color=auto", args[0], args[1])
+		c := exec.Command("diff", "-uN", args[0], args[1])
 		c.Stdout = os.Stdout
 		c.Stderr = os.Stderr
 		c.Run()
